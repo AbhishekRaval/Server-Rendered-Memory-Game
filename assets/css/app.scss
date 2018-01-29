@@ -1,0 +1,21 @@
+/* This file is for your main application css. */
+
+@import "bootstrap";
+
+.side { padding: 4ex; text-align: center; }
+h1 { text-align: center; }
+
+.card {
+  width: 80px;
+  height: 80px;
+  text-align: center;
+  border: 1px solid black;
+  background-color: coral;
+}
+
+.card span {
+  line-height: 80px;
+}
+
+
+
