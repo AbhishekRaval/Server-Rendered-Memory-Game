@@ -1,22 +1,34 @@
 # Memory Game Rules
-Build a pair-of-tiles memory matching game with the following properties:
 
-Start from the starter code.
-Use React to display and update the game board.
-The state of the game should be a single value in the root React component.
-You should primarily need to create and edit JavaScript source files in assets/js, with some possible changes in assets/css.
-Your game should display a 4x4 grid of tiles.
-Each tile should have an associated value: A letter in the range A-H.
-Each letter value should be associated with exactly two tiles.
+Built a pair-of-tiles memory matching game with the following properties:
+
+Uses React to display and update the game board.
+
+The state of the game is a single value in the root React component.
+
+Game displays a 4x4 grid of tiles, but can the grid size can be customized by changing height width in react component.
+
+Each tile have an associated value: A letter in the range A-H.
+
+Each letter value would be associated with exactly two tiles.
+
 Initially, the letters associated with the tiles are hidden.
-Clicking on a tile should expose it's associated letter.
+
+Clicking on a tile exposes it's associated letter.
+
 Clicking on a second tile is a guess that it matches the value of the first tile.
-Guessing should expose the value of the second tile, and then:
-If the two tiles match, then both tiles should be marked completed.
-If the two tiles don't match, the values should be hidden again after a delay (one second is a good delay; clicks during the delay should either be ignored or should skip the remainder of the delay)
-Once the guess is resolved, no non-completed tile values should be exposed, and the user can click another first tile to guess about.
-The number of clicks to match all the pairs (complete all the tiles) should be tracked. Less clicks is a better score at the game.
-There should be a mechanism (e.g. a button) to restart the game at any time.
+
+Guessing would expose the value of the second tile, and then:
+
+  If the two tiles match, then both tiles would be marked completed.
+  
+  If the two tiles don't match, the values would be hidden again after a delay (one second is a good delay; clicks during the delay       should either be ignored or should skip the remainder of the delay)
+  
+Once the guess is resolved, no non-completed tile values would be exposed, and the user can click another first tile to guess about.
+
+The number of clicks to match all the pairs (complete all the tiles) would be tracked. Less clicks is a better score at the game.
+
+There is a mechanism (e.g. a button) to restart the game at any time.
 
 ## Development Instructions
 
