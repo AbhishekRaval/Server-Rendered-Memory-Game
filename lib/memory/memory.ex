@@ -5,7 +5,7 @@ defmodule Memory.Game do
 	end
 
 	def game_state do
-		%{wfc: "Waiting_First_Card" ,wsc: "Waiting_Second_Card"}
+		%{wfc: "Waiting_First_Card" ,wsc: "Waiting_Second_Card",wtc: "Flipp_Uncorrect_cards"}
 	end
 
 	def new do
@@ -13,13 +13,14 @@ defmodule Memory.Game do
 			cards: init_card(),
 			gameState: game_state().wfc,
 			firstcard: nil,
+			secondcard: nil,
 			count: 0,
 			score: 0,
 			percent: 0,
 			height: game_vars().height,
 			width: game_vars().width,
 			str: game_vars().str,
-			secondcard: 0
+			flag: 0
 		}
 	end
 
@@ -38,7 +39,7 @@ defmodule Memory.Game do
 		currcard = Enum.at(game.cards,curri)
 		currcardval = currcard.cardValue
 
-		if(!currcard.flipped && game.secondcard === 0) do
+		if(!currcard.flipped && game.flag === 0) do
 			cond do
 				game.gameState === game_state().wfc  ->
 					currcard = Map.replace!(currcard, :flipped, true)
@@ -52,13 +53,14 @@ defmodule Memory.Game do
 					width: game_vars().width,
 					str: game_vars().str,
 					firstcard: fc,
+					secondcard: nil,
 					count: countUp,
 					percent: game.percent,
 					gameState: game_state().wsc,
-					secondcard: 0}
+					flag: 0}
 
-				game.gameState === game_state().wsc ->		
-					card = game.cards
+					game.gameState === game_state().wsc ->		
+						card = game.cards
 
 					#storing values of firstcard in local variable
 					firstcardIndex = game.firstcard.iIndex*game.width+game.firstcard.jIndex
@@ -68,22 +70,22 @@ defmodule Memory.Game do
 					#flipping second card
 					currcard = Map.replace!(currcard, :flipped, true)
 					card_Send = List.replace_at(card, curri, currcard)
+					sc = %{:iIndex => i, :jIndex => j}
 
 					if firstCardVal === currcardval do 
 
 						#set both colstate to 1
-					firstcardtemp1 = Map.replace!(firstcardtemp, :colstate, 1)
-					currcard = Map.replace!(currcard, :colstate, 1)
+						firstcardtemp1 = Map.replace!(firstcardtemp, :colstate, 1)
+						currcard = Map.replace!(currcard, :colstate, 1)
 
-					card_Send = List.replace_at(card,firstcardIndex,firstcardtemp1)		
-					card_Send2 = List.replace_at(card_Send,curri, currcard)
+						card_Send = List.replace_at(card,firstcardIndex,firstcardtemp1)		
+						card_Send2 = List.replace_at(card_Send,curri, currcard)
 
 					#getting Percentage
 
 					percCount = length(Enum.filter(card_Send2,fn(x)->x.flipped end))
 
 					percentage = (percCount/(game.height*game.width))*100
-
 
 
 					countUp = game.count + 1
@@ -95,64 +97,86 @@ defmodule Memory.Game do
 					width: game_vars().width,
 					str: game_vars().str,
 					firstcard: nil,
+					secondcard: nil,
 					count: countUp,
 					percent: percentage,
 					gameState: game_state().wfc,
-					secondcard: 0}
+					flag: 0}
 
-					else
-
-					firstcardtemp1 = Map.replace!(firstcardtemp, :colstate, 0)
-					firstcardtemp2 = Map.replace!(firstcardtemp1, :flipped, false)
-					card_Send = List.replace_at(card, firstcardIndex,firstcardtemp2)
-
-					currcard1 = Map.replace!(currcard, :flipped, false)	
-					currcard2 = Map.replace!(currcard1, :colstate, 0)	
+				else
 					countUp = game.count + 1
-					currscore = game.score  - 5 - game.count
-
-					card_Send2 = List.replace_at(card_Send, curri, currcard2)
-
-					%{cards: card_Send2,
+					currscore = game.score - 25 - game.count
+					%{cards: card_Send,
 					score: currscore,
 					height: game_vars().height,
 					width: game_vars().width,
 					str: game_vars().str,
-					firstcard: nil,
+					firstcard: game.firstcard,
+					secondcard: sc,
 					count: countUp,
 					percent: game.percent,
 					gameState: game_state().wfc,
-					secondcard: game.secondcard}	
-					end
+					flag: 2}	
 				end
-			else
-				%{cards: game.cards,
-				score: game.score,
-				height: game_vars().height,
-				width: game_vars().width,
-				str: game_vars().str,
-				firstcard: game.firstcard,
-				count: 5,
-				percent: game.percent,
-				gameState: game.gameState,
-				secondcard: game.secondcard}				
 			end
-
-			end
-
-			def client_view(game) do
-				%{
-					cards: game.cards,
-					score: game.score,
-					height: game_vars().height,
-					width: game_vars().width,
-					str: game_vars().str,
-					firstcard: game.firstcard,
-					count: game.count,
-					percent: game.percent,
-					gameState: game.gameState,
-					secondcard: game.secondcard
-				}
-
-			end
+		else
+			%{cards: game.cards,
+			score: game.score,
+			height: game_vars().height,
+			width: game_vars().width,
+			str: game_vars().str,
+			firstcard: game.firstcard,
+			secondcard: game.secondcard,
+			count: game.count,
+			percent: game.percent,
+			gameState: game.gameState,
+			flag: game.flag}				
 		end
+
+	end
+
+	def client_view(game) do
+		%{
+			cards: game.cards,
+			score: game.score,
+			height: game_vars().height,
+			width: game_vars().width,
+			str: game_vars().str,
+			firstcard: game.firstcard,
+			secondcard: game.secondcard,
+			count: game.count,
+			percent: game.percent,
+			gameState: game.gameState,
+			flag: game.flag
+		}
+	end
+
+	def unflipfn(game) do
+		cards = game.cards
+
+		firstcardIndex = game.firstcard.iIndex*game.width+game.firstcard.jIndex
+		seconcardIndex = game.secondcard.iIndex*game.width+game.secondcard.jIndex
+
+		firstcardtemp = Enum.at(cards,firstcardIndex)
+		secondcardtemp = Enum.at(cards,seconcardIndex)
+
+		firstcardtemp1 = Map.replace!(firstcardtemp, :flipped, false)
+		secondcardtemp1 = Map.replace!(secondcardtemp, :flipped, false)
+
+		card_Send = List.replace_at(cards, firstcardIndex,firstcardtemp1)
+		card_Send1 = List.replace_at(card_Send,seconcardIndex,secondcardtemp1)
+		%{
+			cards: card_Send1,
+			score: game.score,
+			height: game_vars().height,
+			width: game_vars().width,
+			str: game_vars().str,
+			firstcard: nil,
+			secondcard: nil,
+			count: game.count,
+			percent: game.percent,
+			gameState: game.gameState,
+			flag: 0
+		}
+	end
+end

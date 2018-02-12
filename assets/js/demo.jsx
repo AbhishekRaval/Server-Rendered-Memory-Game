@@ -120,7 +120,8 @@ class Layout extends React.Component {
       cards: [],
       gameState: gameStatesType.WFC,
       firstCard: null,
-      secondCard: 0,
+      secondCard: null,
+      flag: 0,
       count: 0,
       score: -5,
       percent:0,
@@ -135,7 +136,13 @@ class Layout extends React.Component {
     this.setState({cards: this.onedtotwod(msg.game.cards), 
       score: msg.game.score,
      count: msg.game.count,
-     percent:msg.game.percent});
+     percent:msg.game.percent,
+     flag:msg.game.flag}
+     );
+    if(this.state.flag == 2 ){
+      setTimeout(function(){this.channel.push("unflipfn",{i: 1}).receive("ok",this.gotView.bind(this))}.bind(this), 1000);
+      
+    }
   }
 
   onedtotwod(arrayinp){
@@ -151,7 +158,7 @@ class Layout extends React.Component {
 }
 
   cardClick(card,rowindex,cardIndex) {
-    if (!card.flipped && this.state.secondCard == 0) {
+    if (!card.flipped && this.state.flag == 0) {
       switch (this.state.gameState) {
         case gameStatesType.WFC:
           this.state.cards[rowindex][cardIndex].flipped = true;
@@ -161,7 +168,7 @@ class Layout extends React.Component {
             firstCard: {card: card, row: rowindex, col: cardIndex},
             gameState: gameStatesType.WSC,
             count: this.state.count + 1,
-            secondCard: 0
+            flag: 0
           });
           break;
 
@@ -169,7 +176,7 @@ class Layout extends React.Component {
           this.state.cards[rowindex][cardIndex].flipped = true;
           this.setState({
             cards: this.state.cards,
-            secondCard: 2
+            flag: 2
           });
           if (this.state.firstCard.card.cardValue == card.cardValue) {
                this.state.cards[this.state.firstCard.row][this.state.firstCard.col].colstate = 1;
@@ -190,7 +197,7 @@ class Layout extends React.Component {
               cards: this.state.cards,
               count: this.state.count + 1,
               score: this.state.score,
-              secondCard: 0,
+              flag: 0,
               percent:per
             });
           } else {
@@ -206,7 +213,7 @@ class Layout extends React.Component {
                 gameState: gameStatesType.WFC,
                 count: this.state.count + 1,
                 cards: this.state.cards,
-                secondCard: 0,
+                flag: 0,
                 score: this.state.score
               });
             }.bind(this), 500);
@@ -221,7 +228,7 @@ class Layout extends React.Component {
       cards: [],
       gameState: gameStatesType.WFC,
       firstCard: null,
-      secondCard: 0,
+      flag: 0,
       count: 0,
       score: 0,
       percent:0
