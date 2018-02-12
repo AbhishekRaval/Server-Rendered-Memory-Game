@@ -4,7 +4,7 @@ import { Button } from 'reactstrap';
 import { Progress } from 'reactstrap';
 import { Table } from 'reactstrap';
 
-export default function run_demo(root) {
+export default function run_demo(root,channel) {
   ReactDOM.render( < Layout width = {
     4
   }
@@ -14,6 +14,7 @@ export default function run_demo(root) {
   str = {
     "AABBCCDDEEFFGGHH"
   }
+  channel={channel}
   />, root);
 }
 
@@ -25,8 +26,9 @@ const gameStatesType = {
 };
 
 class Card extends React.Component {
+  
   render() {
-    return <div className ={ !this.props.card.flipped?"card":((this.props.card.colState===1)?"cardReveal":"cardFlip")} >
+    return <div className ={ !this.props.card.flipped?"card":((this.props.card.colstate==1)?"cardReveal":"cardFlip")} >
       <span><div className = "middlefont"> {
         this.props.card.flipped ? this.props.card.cardValue:" "}</div></span> </div >
   }
@@ -87,10 +89,15 @@ function createArray(length) {
 }
 
 
-
 class Layout extends React.Component {
   constructor(props) {
     super(props);
+    this.channel = props.channel;
+    this.onedtotwod = this.onedtotwod.bind(this);
+    this.channel.join()
+  .receive("ok", this.gotView.bind(this))
+  .receive("error", resp => { console.log("Unable to join, failed", resp); });
+
     if (props.width * props.height % 2 == 1) {
       alert("Number of Cards is Odd");
     }
@@ -104,20 +111,18 @@ class Layout extends React.Component {
         cards[i][j] = {
           cardValue: possArray[i * props.width + j],
           flipped: false,
-          i: i,
-          j: j,
-          colState:0
+          colstate:0
         };
       }
     }
 
     this.state = {
-      cards: cards,
+      cards: [],
       gameState: gameStatesType.WFC,
       firstCard: null,
       secondCard: 0,
       count: 0,
-      score: 0,
+      score: -5,
       percent:0,
       height:props.height,
       width:props.width,
@@ -125,15 +130,35 @@ class Layout extends React.Component {
     };
   }
 
-  cardClick(card) {
+  gotView(msg){
+    console.log("Got View",msg);
+    this.setState({cards: this.onedtotwod(msg.game.cards), 
+      score: msg.game.score,
+     count: msg.game.count,
+     percent:msg.game.percent});
+  }
+
+  onedtotwod(arrayinp){
+    var cards1 = createArray(4,4);
+    var k = 0;
+   for (var i = 0; i < 4; i++) {
+    for (var j = 0; j < 4; j++) {
+      cards1[i][j] = arrayinp[k];
+      k++;
+    }    
+  }
+  return cards1
+}
+
+  cardClick(card,rowindex,cardIndex) {
     if (!card.flipped && this.state.secondCard == 0) {
       switch (this.state.gameState) {
         case gameStatesType.WFC:
-          this.state.cards[card.i][card.j].flipped = true;
-          this.state.cards[card.i][card.j].colState = 0;
+          this.state.cards[rowindex][cardIndex].flipped = true;
+          this.state.cards[rowindex][cardIndex].colstate = 0;
           this.setState({
             cards: this.state.cards,
-            firstCard: card,
+            firstCard: {card: card, row: rowindex, col: cardIndex},
             gameState: gameStatesType.WSC,
             count: this.state.count + 1,
             secondCard: 0
@@ -141,24 +166,24 @@ class Layout extends React.Component {
           break;
 
         case gameStatesType.WSC:
-          this.state.cards[card.i][card.j].flipped = true;
+          this.state.cards[rowindex][cardIndex].flipped = true;
           this.setState({
             cards: this.state.cards,
             secondCard: 2
           });
-          if (this.state.firstCard.cardValue == card.cardValue) {
-               this.state.cards[this.state.firstCard.i][this.state.firstCard.j].colState = 1;
+          if (this.state.firstCard.card.cardValue == card.cardValue) {
+               this.state.cards[this.state.firstCard.row][this.state.firstCard.col].colstate = 1;
                this.state.score = this.state.score + 25 +  this.state.count;
-              this.state.cards[card.i][card.j].colState = 1;
+              this.state.cards[rowindex][cardIndex].colstate = 1;
               var countFlipped = 0 ;
-      			    for (var i = 0; i < this.state.height; i++) {
-      			      for (var j = 0; j < this.state.width; j++) {
-      			        if(this.state.cards[i][j].flipped){
-      			        countFlipped++;
-      			        } 
-      			      }
-      			    }
-			    var per = ((countFlipped/(this.state.width*this.state.height))*100);
+                for (var i = 0; i < this.state.height; i++) {
+                  for (var j = 0; j < this.state.width; j++) {
+                    if(this.state.cards[i][j].flipped){
+                    countFlipped++;
+                    } 
+                  }
+                }
+          var per = ((countFlipped/(this.state.width*this.state.height))*100);
 
                     this.setState({
               gameState: gameStatesType.WFC,
@@ -173,10 +198,10 @@ class Layout extends React.Component {
             
               this.state.score = this.state.score - 5 -  this.state.count;
             
-                this.state.cards[this.state.firstCard.i][this.state.firstCard.j].colState = 0;
-              this.state.cards[card.i][card.j].colState = 0;
-              this.state.cards[this.state.firstCard.i][this.state.firstCard.j].flipped = false;
-              this.state.cards[card.i][card.j].flipped = false;
+                this.state.cards[this.state.firstCard.row][this.state.firstCard.col].colstate = 0;
+              this.state.cards[rowindex][cardIndex].colstate = 0;
+              this.state.cards[this.state.firstCard.row][this.state.firstCard.col].flipped = false;
+              this.state.cards[rowindex][cardIndex].flipped = false;
               this.setState({
                 gameState: gameStatesType.WFC,
                 count: this.state.count + 1,
@@ -192,24 +217,8 @@ class Layout extends React.Component {
   }
 
   reset() {
-    var height = this.state.height;
-    var width = this.state.width;
-    var strng = this.state.str;
-    var cards = createArray(height, width);
-    var possArray = generateStringArray(strng);
-    for (var i = 0; i < height; i++) {
-      for (var j = 0; j < width; j++) {
-        cards[i][j] = {
-          cardValue: possArray[i * width + j],
-          flipped: false,
-          i: i,
-          j: j,
-          colState:0
-        };
-      }
-    }
     this.setState({
-      cards: cards,
+      cards: [],
       gameState: gameStatesType.WFC,
       firstCard: null,
       secondCard: 0,
@@ -217,14 +226,19 @@ class Layout extends React.Component {
       score: 0,
       percent:0
     });
+    this.channel.push("resetfn",{}).receive("ok",this.gotView.bind(this))
+  }
 
+  serverClickHandle(card,i,j){
+    this.channel.push("handleclickfn",{i: i, j: j})
+    .receive("ok",this.gotView.bind(this))
   }
 
 
   render() {
     const cardsRendered = this.state.cards.map((rowOfCards, rowindex) => < tr > {
           rowOfCards.map((card, cardIndex) => < td onClick = {
-              () => this.cardClick(card)
+              () => this.serverClickHandle(card,rowindex,cardIndex)
             } > < Card card = {
               card
             }
@@ -233,12 +247,12 @@ class Layout extends React.Component {
        
        
        return <div > 
-	< table class="table table-dark">
-	 < tbody >
-	  < tr >
-	 	< td > {  cardsRendered   } < /td> 
-	 	< /tr > < /tbody>
-	 	 < /table >
+  < table class="table table-dark">
+   < tbody >
+    < tr >
+    < td > {  cardsRendered   }  < /td> 
+    < /tr > < /tbody>
+     < /table >
        < div > <p id="clicks">Number of Clicks: <b>{this.state.count}</b>&nbsp;&nbsp;||&nbsp;&nbsp;Score:  <b> {this.state.score} </b></p> < /div >
     <div class="progressBar">
         <Progress color="success" value={this.state.percent}>{this.state.percent}</Progress></div>   <p>&nbsp;</p>

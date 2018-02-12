@@ -1,4 +1,4 @@
-defmodule MemoryWeb.Router do
+ defmodule MemoryWeb.Router do
   use MemoryWeb, :router
 
   pipeline :browser do
@@ -17,6 +17,7 @@ defmodule MemoryWeb.Router do
     pipe_through :browser # Use the default browser stack
 
     get "/", PageController, :index
+    get "/game/:game_name", PageController, :game
   end
 
   # Other scopes may use custom stacks.
