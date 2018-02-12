@@ -7,7 +7,7 @@ defmodule Memory.Game do
 	def game_state do
 		%{wfc: "Waiting_First_Card" ,wsc: "Waiting_Second_Card",wtc: "Flipp_Uncorrect_cards"}
 	end
-
+ 	
 	def new do
 		%{
 			cards: init_card(),

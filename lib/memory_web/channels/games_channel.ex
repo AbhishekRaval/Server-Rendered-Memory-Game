@@ -32,7 +32,7 @@ defmodule MemoryWeb.GamesChannel do
     {:noreply, socket}
   end
 
- def handle_in("unflipfn",%{"i" => i}, socket) do
+ def handle_in("unflipfn",%{}, socket) do
     game_init = socket.assigns[:game]
     game_fn = Game.unflipfn(game_init)
     Memory.GameBackup.save(socket.assigns[:name], game_fn)
@@ -40,7 +40,7 @@ defmodule MemoryWeb.GamesChannel do
     {:reply, {:ok, %{"game" => Game.client_view(game_fn)}}, socket}
   end
 
-  def handle_in("resetfn", {}, socket) do
+  def handle_in("resetfn", %{}, socket) do
     game_fn = Game.new()
     Memory.GameBackup.save(socket.assigns[:name], game_fn)
     socket = assign(socket, :game, game_fn)
