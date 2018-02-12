@@ -2,7 +2,7 @@ defmodule MemoryWeb.GamesChannel do
   use MemoryWeb, :channel
   alias Memory.Game
   def join("games:" <> name, payload, socket) do
-    game = Game.new
+    game = Memory.GameBackup.load(name) || Game.new
 
     socket = socket
     |> assign(:game, game)
@@ -33,24 +33,28 @@ defmodule MemoryWeb.GamesChannel do
   end
 
  def handle_in("unflipfn",%{"i" => i}, socket) do
-    game0 = socket.assigns[:game]
-    game1 = Game.unflipfn(game0)
-    socket = socket|>assign(:game, game1)
-    {:reply, {:ok, %{"game" => Game.client_view(game1)}}, socket}
+    game_init = socket.assigns[:game]
+    game_fn = Game.unflipfn(game_init)
+    Memory.GameBackup.save(socket.assigns[:name], game_fn)
+    socket = socket|>assign(:game, game_fn)
+    {:reply, {:ok, %{"game" => Game.client_view(game_fn)}}, socket}
   end
 
   def handle_in("resetfn", {}, socket) do
-    game1 = Game.new()
-    socket = assign(socket, :game, game1)
-    {:reply, {:ok, %{"game" => Game.client_view(game1)}}, socket}
+    game_fn = Game.new()
+    Memory.GameBackup.save(socket.assigns[:name], game_fn)
+    socket = assign(socket, :game, game_fn)
+    {:reply, {:ok, %{"game" => Game.client_view(game_fn)}}, socket}
   end
 
   def handle_in("handleclickfn", %{"i" => i, "j" => j}, socket) do
-    game0 = socket.assigns[:game]
-    game1 = Game.handleclickfn(game0,i,j)
-    socket = socket|>assign(:game, game1)
-    {:reply, {:ok, %{"game" => Game.client_view(game1)}}, socket}
+    game_init = socket.assigns[:game]
+    game_fn = Game.handleclickfn(game_init,i,j)
+    Memory.GameBackup.save(socket.assigns[:name], game_fn)
+    socket = socket|>assign(:game, game_fn)
+    {:reply, {:ok, %{"game" => Game.client_view(game_fn)}}, socket}
   end
+
 
  
   # Add authorization logic here as required.

@@ -140,8 +140,7 @@ class Layout extends React.Component {
      flag:msg.game.flag}
      );
     if(this.state.flag == 2 ){
-      setTimeout(function(){this.channel.push("unflipfn",{i: 1}).receive("ok",this.gotView.bind(this))}.bind(this), 1000);
-      
+     this.channel.push("unflipfn",{i: 1}).receive("ok",this.gotView.bind(this));      
     }
   }
 

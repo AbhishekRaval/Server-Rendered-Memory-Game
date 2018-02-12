@@ -165,6 +165,7 @@ defmodule Memory.Game do
 
 		card_Send = List.replace_at(cards, firstcardIndex,firstcardtemp1)
 		card_Send1 = List.replace_at(card_Send,seconcardIndex,secondcardtemp1)
+		:timer.sleep(1000)
 		%{
 			cards: card_Send1,
 			score: game.score,
