@@ -34,48 +34,6 @@ class Card extends React.Component {
   }
 }
 
-
-function delay(ms) {
-  var cur_d = new Date();
-  var cur_ticks = cur_d.getTime();
-  var ms_passed = 0;
-  while (ms_passed < ms) {
-    var d = new Date(); // Possible memory leak?
-    var ticks = d.getTime();
-    ms_passed = ticks - cur_ticks;
-    // d = null;  // Prevent memory leak?
-  }
-}
-
-
-function generateStringArray(str) {
-  var arr = new Array(16);
-  for (var i = 0; i < str.length; i++) {
-    arr[i] = str.charAt(i);
-  }
-  arr = shuffle(arr);
-  return arr;
-}
-
-function shuffle(array) {
-  let counter = array.length;
-
-  // While there are elements in the array
-  while (counter > 0) {
-    // Pick a random index
-    let index = Math.floor(Math.random() * counter);
-
-    // Decrease counter by 1
-    counter--;
-
-    // And swap the last element with it
-    let temp = array[counter];
-    array[counter] = array[index];
-    array[index] = temp;
-  }
-  return array;
-}
-
 function createArray(length) {
   var arr = new Array(length || 0),
     i = length;
@@ -104,18 +62,6 @@ class Layout extends React.Component {
     if (props.width * props.height != props.str.length) {
       alert("String should be of the size" + props.width * props.height)
     }
-    var cards = createArray(props.height, props.width);
-    var possArray = generateStringArray(props.str);
-    for (var i = 0; i < props.height; i++) {
-      for (var j = 0; j < props.width; j++) {
-        cards[i][j] = {
-          cardValue: possArray[i * props.width + j],
-          flipped: false,
-          colstate:0
-        };
-      }
-    }
-
     this.state = {
       cards: [],
       gameState: gameStatesType.WFC,
@@ -156,71 +102,7 @@ class Layout extends React.Component {
   return cards1
 }
 
-  cardClick(card,rowindex,cardIndex) {
-    if (!card.flipped && this.state.flag == 0) {
-      switch (this.state.gameState) {
-        case gameStatesType.WFC:
-          this.state.cards[rowindex][cardIndex].flipped = true;
-          this.state.cards[rowindex][cardIndex].colstate = 0;
-          this.setState({
-            cards: this.state.cards,
-            firstCard: {card: card, row: rowindex, col: cardIndex},
-            gameState: gameStatesType.WSC,
-            count: this.state.count + 1,
-            flag: 0
-          });
-          break;
 
-        case gameStatesType.WSC:
-          this.state.cards[rowindex][cardIndex].flipped = true;
-          this.setState({
-            cards: this.state.cards,
-            flag: 2
-          });
-          if (this.state.firstCard.card.cardValue == card.cardValue) {
-               this.state.cards[this.state.firstCard.row][this.state.firstCard.col].colstate = 1;
-               this.state.score = this.state.score + 25 +  this.state.count;
-              this.state.cards[rowindex][cardIndex].colstate = 1;
-              var countFlipped = 0 ;
-                for (var i = 0; i < this.state.height; i++) {
-                  for (var j = 0; j < this.state.width; j++) {
-                    if(this.state.cards[i][j].flipped){
-                    countFlipped++;
-                    } 
-                  }
-                }
-          var per = ((countFlipped/(this.state.width*this.state.height))*100);
-
-                    this.setState({
-              gameState: gameStatesType.WFC,
-              cards: this.state.cards,
-              count: this.state.count + 1,
-              score: this.state.score,
-              flag: 0,
-              percent:per
-            });
-          } else {
-            setTimeout(function() {
-            
-              this.state.score = this.state.score - 5 -  this.state.count;
-            
-                this.state.cards[this.state.firstCard.row][this.state.firstCard.col].colstate = 0;
-              this.state.cards[rowindex][cardIndex].colstate = 0;
-              this.state.cards[this.state.firstCard.row][this.state.firstCard.col].flipped = false;
-              this.state.cards[rowindex][cardIndex].flipped = false;
-              this.setState({
-                gameState: gameStatesType.WFC,
-                count: this.state.count + 1,
-                cards: this.state.cards,
-                flag: 0,
-                score: this.state.score
-              });
-            }.bind(this), 500);
-          }
-          break;
-      }
-    }
-  }
 
   reset() {
     this.setState({
