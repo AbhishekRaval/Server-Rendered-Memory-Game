@@ -1,9 +1,8 @@
-
-<div class="d-flex justify-content-center align-items-center" style="height:100px;">
+<div class="container" style="display: flex; justify-content: center; align-items: center;">
     <div class="jumbotron my-auto">
 			<h1 class="display-4">Enter the name of application </h1>
 			<p><input type="text"  class="form-control" id="game-name" name="Game Name"></p>
-			<p><a href="" id="ahr"><Button   class="btn btn-primary btn-lg" id="game-button"> Go to Game</Button></a></p>
+			<p><a href="" id="ahr"><Button class="btn btn-primary" id="game-button">Go to Game</Button></a></p>
 			<p id="game-out"> </p>
 		</div>
 </div>

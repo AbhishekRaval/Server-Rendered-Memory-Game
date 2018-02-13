@@ -105,7 +105,7 @@ defmodule Memory.Game do
 
 				else
 					countUp = game.count + 1
-					currscore = game.score - 25 - game.count
+					currscore = game.score - 5 - game.count
 					%{cards: card_Send,
 					score: currscore,
 					height: game_vars().height,
