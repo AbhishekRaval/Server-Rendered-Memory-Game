@@ -5,12 +5,13 @@ defmodule Memory.Game do
 	end
 
 	def game_state do
-		%{wfc: "Waiting_First_Card" ,wsc: "Waiting_Second_Card",wtc: "Flipp_Uncorrect_cards"}
+		%{wfc: "Waiting_First_Card" ,
+		wsc: "Waiting_Second_Card",wtc: "Flipp_Uncorrect_cards"}
 	end
- 	
+
 	def new do
 		%{
-			cards: init_card(),
+			cards: init_card()|>Enum.chunk_every(4),
 			gameState: game_state().wfc,
 			firstcard: nil,
 			secondcard: nil,
@@ -32,11 +33,11 @@ defmodule Memory.Game do
 		Enum.shuffle(card)
 	end
 
-
 	def handleclickfn(game,i,j) do
 		card = game.cards
+		card = card|>List.flatten
 		curri = i*game.width + j
-		currcard = Enum.at(game.cards,curri)
+		currcard = Enum.at(card,curri)
 		currcardval = currcard.cardValue
 
 		if(!currcard.flipped && game.flag === 0) do
@@ -47,7 +48,7 @@ defmodule Memory.Game do
 					card_Send = List.replace_at(card, curri, currcard)
 					countUp = game.count + 1
 					fc = %{ :iIndex => i, :jIndex => j}
-					%{cards: card_Send,
+					%{cards: card_Send|>Enum.chunk_every(4),
 					score: game.score,
 					height: game_vars().height,
 					width: game_vars().width,
@@ -59,66 +60,68 @@ defmodule Memory.Game do
 					gameState: game_state().wsc,
 					flag: 0}
 
-					game.gameState === game_state().wsc ->		
-						card = game.cards
 
-					#storing values of firstcard in local variable
-					firstcardIndex = game.firstcard.iIndex*game.width+game.firstcard.jIndex
-					firstcardtemp = Enum.at(card,firstcardIndex)	
-					firstCardVal = firstcardtemp.cardValue
+				game.gameState === game_state().wsc ->		
+					card = game.cards
+					card = card|>List.flatten
 
-					#flipping second card
-					currcard = Map.replace!(currcard, :flipped, true)
-					card_Send = List.replace_at(card, curri, currcard)
-					sc = %{:iIndex => i, :jIndex => j}
+				#storing values of firstcard in local variable
+				firstcardIndex = game.firstcard.iIndex*game.width+game.firstcard.jIndex
+				firstcardtemp = Enum.at(card,firstcardIndex)	
+				firstCardVal = firstcardtemp.cardValue
 
-					if firstCardVal === currcardval do 
+				#flipping second card
+				currcard = Map.replace!(currcard, :flipped, true)
+				card_Send = List.replace_at(card, curri, currcard)
+				sc = %{:iIndex => i, :jIndex => j}
 
-						#set both colstate to 1
-						firstcardtemp1 = Map.replace!(firstcardtemp, :colstate, 1)
-						currcard = Map.replace!(currcard, :colstate, 1)
+				if firstCardVal === currcardval do 
 
-						card_Send = List.replace_at(card,firstcardIndex,firstcardtemp1)		
-						card_Send2 = List.replace_at(card_Send,curri, currcard)
+					#set both colstate to 1
+					firstcardtemp1 = Map.replace!(firstcardtemp, :colstate, 1)
+					currcard = Map.replace!(currcard, :colstate, 1)
 
-					#getting Percentage
+					card_Send = List.replace_at(card,firstcardIndex,firstcardtemp1)		
+					card_Send2 = List.replace_at(card_Send,curri, currcard)
 
-					percCount = length(Enum.filter(card_Send2,fn(x)->x.flipped end))
+				#getting Percentage
 
-					percentage = (percCount/(game.height*game.width))*100
+				percCount = length(Enum.filter(card_Send2,fn(x)->x.flipped end))
+
+				percentage = (percCount/(game.height*game.width))*100
 
 
-					countUp = game.count + 1
-					currscore = game.score + 25 + game.count
+				countUp = game.count + 1
+				currscore = game.score + 25 + game.count
 
-					%{cards: card_Send2,
-					score: currscore,
-					height: game_vars().height,
-					width: game_vars().width,
-					str: game_vars().str,
-					firstcard: nil,
-					secondcard: nil,
-					count: countUp,
-					percent: percentage,
-					gameState: game_state().wfc,
-					flag: 0}
+				%{cards: card_Send2|>Enum.chunk_every(4),
+				score: currscore,
+				height: game_vars().height,
+				width: game_vars().width,
+				str: game_vars().str,
+				firstcard: nil,
+				secondcard: nil,
+				count: countUp,
+				percent: percentage,
+				gameState: game_state().wfc,
+				flag: 0}
 
-				else
-					countUp = game.count + 1
-					currscore = game.score - 5 - game.count
-					%{cards: card_Send,
-					score: currscore,
-					height: game_vars().height,
-					width: game_vars().width,
-					str: game_vars().str,
-					firstcard: game.firstcard,
-					secondcard: sc,
-					count: countUp,
-					percent: game.percent,
-					gameState: game_state().wfc,
-					flag: 2}	
-				end
+			else
+				countUp = game.count + 1
+				currscore = game.score - 25 - game.count
+				%{cards: card_Send|>Enum.chunk_every(4),
+				score: currscore,
+				height: game_vars().height,
+				width: game_vars().width,
+				str: game_vars().str,
+				firstcard: game.firstcard,
+				secondcard: sc,
+				count: countUp,
+				percent: game.percent,
+				gameState: game_state().wfc,
+				flag: 2}	
 			end
+		end
 		else
 			%{cards: game.cards,
 			score: game.score,
@@ -152,7 +155,8 @@ defmodule Memory.Game do
 	end
 
 	def unflipfn(game) do
-		cards = game.cards
+		card = game.cards
+		cards = card|>List.flatten
 
 		firstcardIndex = game.firstcard.iIndex*game.width+game.firstcard.jIndex
 		seconcardIndex = game.secondcard.iIndex*game.width+game.secondcard.jIndex
@@ -167,7 +171,7 @@ defmodule Memory.Game do
 		card_Send1 = List.replace_at(card_Send,seconcardIndex,secondcardtemp1)
 		:timer.sleep(1000)
 		%{
-			cards: card_Send1,
+			cards: card_Send1|>Enum.chunk_every(4),
 			score: game.score,
 			height: game_vars().height,
 			width: game_vars().width,
