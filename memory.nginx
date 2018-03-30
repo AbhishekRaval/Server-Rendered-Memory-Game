@@ -1,11 +1,15 @@
 server {
-	listen 80;
-	listen [::]:80;
+  listen 80;
+  server_name memoryserver.abhishekraval.com;
 
-	server_name memory.ironbeard.com;
+   location / {
+        proxy_set_header Origin '';
+        proxy_pass http://localhost:5205;
+        #try_files $uri $uri/ =404;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
 
-	location / {
-		proxy_pass http://localhost:5100;
-		#try_files $uri $uri/ =404;
-	}
+    }
+
 }
