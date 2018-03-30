@@ -1,5 +1,5 @@
-<div class="container" style="display: flex; justify-content: center; align-items: center;">
-    <div class="jumbotron my-auto">
+<div style="display: flex; justify-content: center; align-items: center;">
+    <div class="my-auto">
 			<h1 class="display-4">Enter the name of application </h1>
 			<p><input type="text"  class="form-control" id="game-name" name="Game Name"></p>
 			<p><a href="" id="ahr"><Button class="btn btn-primary" id="game-button">Go to Game</Button></a></p>

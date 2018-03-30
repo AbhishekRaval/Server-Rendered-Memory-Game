@@ -14,26 +14,35 @@
     <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
   </head>
 
-  <body>
+  <body style="background-color: #DCD9D4; 
+ background-image: linear-gradient(to bottom, rgba(255,255,255,0.50) 0%, rgba(0,0,0,0.50) 100%), radial-gradient(at 50% 0%, rgba(255,255,255,0.10) 0%, rgba(0,0,0,0.50) 50%); 
+ background-blend-mode: soft-light,screen;">
     <div class="container">
-      <%= if get_flash(@conn, :info) || get_flash(@conn, :error) do %>
-      <div class="row">
-        <div class="col-12">
-          <%= if get_flash(@conn, :info) do %>
-            <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
-          <% end %>
-          <%= if get_flash(@conn, :error) do %>
-            <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
-          <% end %>
-        </div>
-      </div>
-      <% end %>
+      <section class="h-100">
+        <header class=" h-100">
+          <div class="d-flex align-items-center justify-content-center h-100 py-5">
+            <div class="d-flex flex-column mx-auto">
 
       <main role="main">
         <%= render @view_module, @view_template, assigns %>
       </main>
 
-    </div> <!-- /container -->
+            </div> <!-- /container -->
+          </div> 
+    </header>
+  </section>
+  </div>
     <script src="<%= static_path(@conn, "/js/app.js") %>"></script>
   </body>
 </html>
+<style>
+html,body{
+  height: 100%;
+  width: 100%;
+}
+.container{
+  height: 100%;
+  width: 100%;
+}
+  
+</style>
